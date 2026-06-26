@@ -110,6 +110,10 @@
             </nav>
 
             <div class="nav-actions">
+                <button id="preorderNavBtn" class="btn btn-primary-nav" style="margin-right: 10px; background-color: var(--color-primary); color: var(--color-white); border: none; padding: 8px 16px; border-radius: var(--border-radius-sm); font-family: var(--font-body); font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: var(--transition-fast);">
+                    <i data-lucide="shopping-bag" style="width: 16px; height: 16px;"></i>
+                    <span>สั่งซื้อล่วงหน้า</span>
+                </button>
                 <a href="https://lin.ee/tWdmBoa" target="_blank" rel="noopener noreferrer" class="btn btn-line-nav">
                     <i data-lucide="message-square"></i>
                     <span>แอดไลน์สั่งซื้อ</span>
@@ -137,6 +141,9 @@
             <a href="https://lin.ee/tWdmBoa" target="_blank" rel="noopener noreferrer" class="btn btn-line btn-block">
                 <i data-lucide="message-circle"></i> แอดไลน์ไอดี (@maneemeethuay)
             </a>
+            <button id="preorderMobileBtn" class="btn btn-primary btn-block" style="margin-top: 10px; background-color: var(--color-primary); color: var(--color-white); border: none; padding: 12px; border-radius: var(--border-radius-sm); font-family: var(--font-body); font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; width: 100%;">
+                <i data-lucide="shopping-bag" style="width: 16px; height: 16px;"></i> สั่งซื้อล่วงหน้า
+            </button>
         </nav>
     </div>
 
@@ -151,13 +158,13 @@
                     เมื่อ "รสชาติกาแฟ" ผสานเข้ากับ "ศิลปะเซรามิกทำมือ" เราตั้งใจคัดสรรเมล็ดกาแฟชั้นเยี่ยม ชงด้วยความใส่ใจ และเสิร์ฟในถ้วยเซรามิกสะสมที่มีเอกลักษณ์ไม่ซ้ำกัน เพื่อสร้างช่วงเวลาที่ดีที่สุดให้กับคุณ
                 </p>
                 <div class="hero-cta-group">
-                    <a href="https://lin.ee/tWdmBoa" target="_blank" rel="noopener noreferrer" class="btn btn-primary animate-pulse">
+                    <button id="preorderHeroBtn" class="btn btn-primary animate-pulse" style="border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i data-lucide="shopping-bag"></i>
+                        <span>สั่งซื้อล่วงหน้า</span>
+                    </button>
+                    <a href="https://lin.ee/tWdmBoa" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
                         <i data-lucide="message-circle"></i>
-                        <span>สั่งผ่าน LINE (ลด 10%)</span>
-                    </a>
-                    <a href="#story" class="btn btn-secondary">
-                        <span>อ่านเรื่องราวของเรา</span>
-                        <i data-lucide="arrow-right"></i>
+                        <span>แอดไลน์ (ลด 10%)</span>
                     </a>
                 </div>
                 <div class="hero-badges">
@@ -839,6 +846,319 @@
                 addMessage('ขออภัยด้วยค่ะ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้งนะคะ', 'ai');
             }
         });
+
+        // ==========================================
+        // Pre-order Modal Functionality
+        // ==========================================
+        const preorderModal = document.getElementById('preorderModal');
+        const preorderForm = document.getElementById('preorderForm');
+        const preorderNavBtn = document.getElementById('preorderNavBtn');
+        const preorderMobileBtn = document.getElementById('preorderMobileBtn');
+        const preorderHeroBtn = document.getElementById('preorderHeroBtn');
+        const closePreorderModal = document.getElementById('closePreorderModal');
+        const preorderTotalPrice = document.getElementById('preorderTotalPrice');
+        const submitPreorderBtn = document.getElementById('submitPreorderBtn');
+
+        // Open Modal
+        const openModal = () => {
+            preorderModal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Disable background scrolling
+            
+            // Set default minimum datetime to current local time + 30 minutes
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + 30);
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('preorderTime').min = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+        };
+
+        // Close Modal
+        const closeModal = () => {
+            preorderModal.classList.remove('active');
+            document.body.style.overflow = ''; // Restore scrolling
+        };
+
+        if (preorderNavBtn) preorderNavBtn.addEventListener('click', openModal);
+        if (preorderMobileBtn) preorderMobileBtn.addEventListener('click', () => {
+            // Close mobile drawer if open
+            const mobileDrawer = document.getElementById('mobileDrawer');
+            if (mobileDrawer) mobileDrawer.classList.remove('active');
+            openModal();
+        });
+        if (preorderHeroBtn) preorderHeroBtn.addEventListener('click', openModal);
+        if (closePreorderModal) closePreorderModal.addEventListener('click', closeModal);
+
+        // Close on clicking outside container
+        preorderModal.addEventListener('click', (e) => {
+            if (e.target === preorderModal) closeModal();
+        });
+
+        // Item quantity and checkbox interaction
+        const itemCards = document.querySelectorAll('.preorder-item-card');
+        
+        const calculateTotal = () => {
+            let total = 0;
+            let hasSelection = false;
+
+            itemCards.forEach(card => {
+                const checkbox = card.querySelector('.item-checkbox');
+                const qtyValSpan = card.querySelector('.qty-val');
+                const minusBtn = card.querySelector('.qty-minus');
+                const plusBtn = card.querySelector('.qty-plus');
+                
+                const price = parseInt(card.dataset.price);
+                
+                if (checkbox.checked) {
+                    hasSelection = true;
+                    minusBtn.removeAttribute('disabled');
+                    plusBtn.removeAttribute('disabled');
+                    
+                    const qty = parseInt(qtyValSpan.textContent);
+                    total += price * qty;
+                    card.classList.add('selected');
+                } else {
+                    minusBtn.setAttribute('disabled', 'true');
+                    plusBtn.setAttribute('disabled', 'true');
+                    card.classList.remove('selected');
+                }
+            });
+
+            preorderTotalPrice.textContent = `${total} บาท`;
+            
+            if (hasSelection) {
+                submitPreorderBtn.removeAttribute('disabled');
+            } else {
+                submitPreorderBtn.setAttribute('disabled', 'true');
+            }
+        };
+
+        itemCards.forEach(card => {
+            const checkbox = card.querySelector('.item-checkbox');
+            const qtyValSpan = card.querySelector('.qty-val');
+            const minusBtn = card.querySelector('.qty-minus');
+            const plusBtn = card.querySelector('.qty-plus');
+
+            checkbox.addEventListener('change', calculateTotal);
+
+            minusBtn.addEventListener('click', () => {
+                let qty = parseInt(qtyValSpan.textContent);
+                if (qty > 1) {
+                    qty--;
+                    qtyValSpan.textContent = qty;
+                    calculateTotal();
+                }
+            });
+
+            plusBtn.addEventListener('click', () => {
+                let qty = parseInt(qtyValSpan.textContent);
+                qty++;
+                qtyValSpan.textContent = qty;
+                calculateTotal();
+            });
+        });
+
+        // Submit Form
+        preorderForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('preorderName').value.trim();
+            const phone = document.getElementById('preorderPhone').value.trim();
+            const pickupTime = document.getElementById('preorderTime').value;
+            const cupPreference = document.getElementById('preorderCup').value;
+            const notes = document.getElementById('preorderNotes').value.trim();
+
+            const selectedItems = [];
+            itemCards.forEach(card => {
+                const checkbox = card.querySelector('.item-checkbox');
+                if (checkbox.checked) {
+                    selectedItems.push({
+                        name: card.dataset.name,
+                        quantity: parseInt(card.querySelector('.qty-val').textContent),
+                        price: parseInt(card.dataset.price)
+                    });
+                }
+            });
+
+            if (selectedItems.length === 0) {
+                alert('กรุณาเลือกเครื่องดื่มหรือขนมอย่างน้อย 1 รายการค่ะ');
+                return;
+            }
+
+            const totalPrice = selectedItems.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0);
+
+            // Change submit state
+            submitPreorderBtn.setAttribute('disabled', 'true');
+            const originalBtnHtml = submitPreorderBtn.innerHTML;
+            submitPreorderBtn.innerHTML = '<span>กำลังบันทึกออเดอร์...</span>';
+
+            try {
+                const response = await fetch('/api/preorder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        phone,
+                        pickupTime: new Date(pickupTime).toLocaleString('th-TH'),
+                        cupPreference,
+                        items: selectedItems,
+                        totalPrice,
+                        notes
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    alert('🎉 สั่งซื้อล่วงหน้าสำเร็จแล้วค่ะ! ทางร้านได้รับออเดอร์เรียบร้อยแล้วค่ะ');
+                    preorderForm.reset();
+                    // Reset selected states
+                    itemCards.forEach(card => {
+                        card.querySelector('.item-checkbox').checked = false;
+                        card.querySelector('.qty-val').textContent = '1';
+                    });
+                    calculateTotal();
+                    closeModal();
+                } else {
+                    alert(`ขออภัยค่ะ เกิดข้อผิดพลาด: ${result.message || 'กรุณาลองใหม่อีกครั้ง'}`);
+                }
+            } catch (err) {
+                alert('ขออภัยค่ะ ไม่สามารถส่งออเดอร์ได้ในขณะนี้ กรุณาตรวจสอบอินเทอร์เน็ตหรือติดต่อทางร้านโดยตรงค่ะ');
+            } finally {
+                submitPreorderBtn.innerHTML = originalBtnHtml;
+                submitPreorderBtn.removeAttribute('disabled');
+            }
+        });
     </script>
+    
+    <!-- Pre-order Modal HTML Markup -->
+    <div id="preorderModal" class="preorder-modal-overlay">
+        <div class="preorder-modal-container">
+            <div class="preorder-modal-header">
+                <h3>☕ สั่งเครื่องดื่มล่วงหน้า</h3>
+                <button id="closePreorderModal" class="preorder-modal-close" aria-label="ปิด">&times;</button>
+            </div>
+            
+            <form id="preorderForm" class="preorder-form">
+                <div class="form-section">
+                    <h4 class="form-section-title">1. ข้อมูลการติดต่อและรับสินค้า</h4>
+                    <div class="form-group-grid">
+                        <div class="form-group">
+                            <label for="preorderName">ชื่อผู้สั่ง <span class="required">*</span></label>
+                            <input type="text" id="preorderName" required placeholder="ชื่อของคุณ">
+                        </div>
+                        <div class="form-group">
+                            <label for="preorderPhone">เบอร์โทรศัพท์ <span class="required">*</span></label>
+                            <input type="tel" id="preorderPhone" required placeholder="เช่น 0812345678" pattern="[0-9]{9,10}">
+                        </div>
+                    </div>
+                    <div class="form-group-grid">
+                        <div class="form-group">
+                            <label for="preorderTime">วันและเวลารับสินค้า <span class="required">*</span></label>
+                            <input type="datetime-local" id="preorderTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="preorderCup">สไตล์ถ้วยที่ต้องการ</label>
+                            <select id="preorderCup">
+                                <option value="ถ้วยดินเผาโบราณ">ถ้วยดินเผาโบราณ (โฮมเมด)</option>
+                                <option value="ถ้วยเซรามิกเคลือบเงา">ถ้วยเซรามิกเคลือบเงา (ทันสมัย)</option>
+                                <option value="ไม่ระบุ/แล้วแต่ร้าน">ไม่ระบุ (ให้ทางร้านเลือกให้)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4 class="form-section-title">2. เลือกเครื่องดื่มและขนม <span class="required">*</span></h4>
+                    <div class="preorder-items-grid">
+                        <!-- Item 1 -->
+                        <div class="preorder-item-card" data-id="mane-espresso" data-name="มานี เอสเปรสโซ่" data-price="65">
+                            <div class="item-info">
+                                <input type="checkbox" id="item_mane_espresso" class="item-checkbox">
+                                <label for="item_mane_espresso" class="item-label">
+                                    <span class="item-title">มานี เอสเปรสโซ่</span>
+                                    <span class="item-price">65 บาท</span>
+                                </label>
+                            </div>
+                            <div class="item-quantity-control">
+                                <button type="button" class="qty-btn qty-minus" disabled>-</button>
+                                <span class="qty-val">1</span>
+                                <button type="button" class="qty-btn qty-plus" disabled>+</button>
+                            </div>
+                        </div>
+
+                        <!-- Item 2 -->
+                        <div class="preorder-item-card" data-id="creamy-thai-tea" data-name="ชาไทยละมุนถ้วย" data-price="60">
+                            <div class="item-info">
+                                <input type="checkbox" id="item_creamy_thai_tea" class="item-checkbox">
+                                <label for="item_creamy_thai_tea" class="item-label">
+                                    <span class="item-title">ชาไทยละมุนถ้วย</span>
+                                    <span class="item-price">60 บาท</span>
+                                </label>
+                            </div>
+                            <div class="item-quantity-control">
+                                <button type="button" class="qty-btn qty-minus" disabled>-</button>
+                                <span class="qty-val">1</span>
+                                <button type="button" class="qty-btn qty-plus" disabled>+</button>
+                            </div>
+                        </div>
+
+                        <!-- Item 3 -->
+                        <div class="preorder-item-card" data-id="coconut-cold-brew" data-name="กาแฟมะพร้าวน้ำหอม" data-price="75">
+                            <div class="item-info">
+                                <input type="checkbox" id="item_coconut_cold_brew" class="item-checkbox">
+                                <label for="item_coconut_cold_brew" class="item-label">
+                                    <span class="item-title">กาแฟมะพร้าวน้ำหอม</span>
+                                    <span class="item-price">75 บาท</span>
+                                </label>
+                            </div>
+                            <div class="item-quantity-control">
+                                <button type="button" class="qty-btn qty-minus" disabled>-</button>
+                                <span class="qty-val">1</span>
+                                <button type="button" class="qty-btn qty-plus" disabled>+</button>
+                            </div>
+                        </div>
+
+                        <!-- Item 4 -->
+                        <div class="preorder-item-card" data-id="pandan-sweet-cup" data-name="ขนมครกใบเตยโบราณ" data-price="45">
+                            <div class="item-info">
+                                <input type="checkbox" id="item_pandan_sweet_cup" class="item-checkbox">
+                                <label for="item_pandan_sweet_cup" class="item-label">
+                                    <span class="item-title">ขนมครกใบเตยโบราณ</span>
+                                    <span class="item-price">45 บาท</span>
+                                </label>
+                            </div>
+                            <div class="item-quantity-control">
+                                <button type="button" class="qty-btn qty-minus" disabled>-</button>
+                                <span class="qty-val">1</span>
+                                <button type="button" class="qty-btn qty-plus" disabled>+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-group">
+                        <label for="preorderNotes">หมายเหตุเพิ่มเติม (เช่น ความหวาน, รายละเอียดอื่นๆ)</label>
+                        <textarea id="preorderNotes" rows="2" placeholder="ระบุรายละเอียดเพิ่มเติม..."></textarea>
+                    </div>
+                </div>
+
+                <div class="preorder-summary">
+                    <div class="total-price-display">
+                        <span>ราคารวมทั้งหมด:</span>
+                        <strong id="preorderTotalPrice">0 บาท</strong>
+                    </div>
+                    <button type="submit" id="submitPreorderBtn" class="btn btn-primary" disabled style="border: none; cursor: pointer;">
+                        <span>ยืนยันการสั่งซื้อล่วงหน้า</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

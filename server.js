@@ -86,7 +86,7 @@ app.post('/api/chat', async (req, res) => {
             model: 'openrouter/free',
             messages: messages,
             temperature: 0.7,
-            max_tokens: 800
+            max_tokens: 1000
         };
 
         const response = await fetch(
@@ -127,6 +127,37 @@ app.post('/api/chat', async (req, res) => {
         console.error('Server error during chat request:', error);
         return res.status(500).json({
             error: 'เซิร์ฟเวอร์ขัดข้อง กรุณาลองใหม่อีกครั้งค่ะ'
+        });
+    }
+});
+
+// API endpoint to proxy preorder requests to Google Apps Script Web App
+app.post('/api/preorder', async (req, res) => {
+    const googleScriptUrl = process.env.GOOGLE_SCRIPT_URL;
+
+    if (!googleScriptUrl || googleScriptUrl === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+        return res.status(500).json({
+            status: 'error',
+            message: 'เซิร์ฟเวอร์ยังไม่ได้ตั้งค่า GOOGLE_SCRIPT_URL ในไฟล์ .env ค่ะ'
+        });
+    }
+
+    try {
+        const response = await fetch(googleScriptUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(req.body)
+        });
+
+        const data = await response.json();
+        return res.json(data);
+    } catch (error) {
+        console.error('Preorder proxy error:', error);
+        return res.status(500).json({
+            status: 'error',
+            message: 'ไม่สามารถติดต่อกับ Google Sheets ได้ในขณะนี้ กรุณาลองใหม่อีกครั้งค่ะ'
         });
     }
 });
