@@ -44,14 +44,14 @@ const SYSTEM_INSTRUCTION = `
 - ห้ามตอบคำถามอื่นที่ไม่เกี่ยวข้องกับร้าน หรือเรื่องที่เป็นความรู้ทั่วไปมากเกินไป ให้ดึงกลับมาเรื่องกาแฟและร้านมานีมีถ้วยอย่างสุภาพ
 `;
 
-// API endpoint to proxy chatbot request to Gemini API
+// API endpoint to proxy chatbot request to OpenRouter API
 app.post('/api/chat', async (req, res) => {
     const { message, history } = req.body;
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.OPENROUTER_API_KEY;
 
-    if (!apiKey || apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
+    if (!apiKey || apiKey === 'YOUR_OPENROUTER_API_KEY_HERE') {
         return res.status(500).json({
-            error: 'ขออภัย ระบบแชทบอทยังไม่ได้ติดตั้ง API Key ของ Google AI Studio กรุณาติดตั้งในไฟล์ .env ก่อนใช้งานค่ะ'
+            error: 'ขออภัย ระบบแชทบอทยังไม่ได้ติดตั้ง OpenRouter API Key กรุณาติดตั้งในไฟล์ .env ก่อนใช้งานค่ะ'
         });
     }
 
@@ -60,45 +60,43 @@ app.post('/api/chat', async (req, res) => {
     }
 
     try {
-        // Format history for Gemini API
-        const contents = [];
+        // Construct messages array in OpenAI/OpenRouter format
+        const messages = [
+            { role: 'system', content: SYSTEM_INSTRUCTION }
+        ];
 
-        // Add system instruction inside instruction setup or user message context for simplicity
-        // We will make a POST to Gemini v1beta API with System Instructions supported
-
-        // Format chat history
+        // Format and append chat history
         if (history && Array.isArray(history)) {
             history.forEach(item => {
-                contents.push({
-                    role: item.role === 'user' ? 'user' : 'model',
-                    parts: [{ text: item.text }]
+                messages.push({
+                    role: item.role === 'user' ? 'user' : 'assistant',
+                    content: item.text
                 });
             });
         }
 
         // Add current user message
-        contents.push({
+        messages.push({
             role: 'user',
-            parts: [{ text: message }]
+            content: message
         });
 
         const requestBody = {
-            contents: contents,
-            systemInstruction: {
-                parts: [{ text: SYSTEM_INSTRUCTION }]
-            },
-            generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 800,
-            }
+            model: 'google/gemini-3.5-flash',
+            messages: messages,
+            temperature: 0.7,
+            max_tokens: 800
         };
 
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
+            'https://openrouter.ai/api/v1/chat/completions',
             {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`,
+                    'HTTP-Referer': 'http://localhost:3000',
+                    'X-Title': 'Manee Mee Thuay Cafe'
                 },
                 body: JSON.stringify(requestBody)
             }
@@ -106,7 +104,7 @@ app.post('/api/chat', async (req, res) => {
 
         if (!response.ok) {
             const errData = await response.json();
-            console.error('Gemini API Error:', errData);
+            console.error('OpenRouter API Error:', errData);
             return res.status(502).json({
                 error: 'ระบบตอบกลับขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้งนะคะ'
             });
@@ -114,10 +112,11 @@ app.post('/api/chat', async (req, res) => {
 
         const data = await response.json();
 
-        if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
-            const aiReply = data.candidates[0].content.parts[0].text;
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+            const aiReply = data.choices[0].message.content;
             return res.json({ reply: aiReply });
         } else {
+            console.error('Unexpected OpenRouter response:', data);
             return res.status(500).json({
                 error: 'ไม่สามารถประมวลผลคำตอบได้ กรุณาลองใหม่อีกครั้งค่ะ'
             });
