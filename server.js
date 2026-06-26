@@ -62,10 +62,10 @@ app.post('/api/chat', async (req, res) => {
     try {
         // Format history for Gemini API
         const contents = [];
-        
+
         // Add system instruction inside instruction setup or user message context for simplicity
         // We will make a POST to Gemini v1beta API with System Instructions supported
-        
+
         // Format chat history
         if (history && Array.isArray(history)) {
             history.forEach(item => {
@@ -75,7 +75,7 @@ app.post('/api/chat', async (req, res) => {
                 });
             });
         }
-        
+
         // Add current user message
         contents.push({
             role: 'user',
@@ -94,7 +94,7 @@ app.post('/api/chat', async (req, res) => {
         };
 
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
             {
                 method: 'POST',
                 headers: {
@@ -113,7 +113,7 @@ app.post('/api/chat', async (req, res) => {
         }
 
         const data = await response.json();
-        
+
         if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
             const aiReply = data.candidates[0].content.parts[0].text;
             return res.json({ reply: aiReply });
