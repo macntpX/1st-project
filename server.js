@@ -82,7 +82,7 @@ app.post('/api/chat', async (req, res) => {
         });
 
         const requestBody = {
-            model: 'google/gemini-3.5-flash',
+            model: 'nvidia/nemotron-3-ultra-550b-a55b:free',
             messages: messages,
             temperature: 0.7,
             max_tokens: 800
