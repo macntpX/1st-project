@@ -850,188 +850,195 @@
         // ==========================================
         // Pre-order Modal Functionality
         // ==========================================
-        const preorderModal = document.getElementById('preorderModal');
-        const preorderForm = document.getElementById('preorderForm');
-        const preorderNavBtn = document.getElementById('preorderNavBtn');
-        const preorderMobileBtn = document.getElementById('preorderMobileBtn');
-        const preorderHeroBtn = document.getElementById('preorderHeroBtn');
-        const closePreorderModal = document.getElementById('closePreorderModal');
-        const preorderTotalPrice = document.getElementById('preorderTotalPrice');
-        const submitPreorderBtn = document.getElementById('submitPreorderBtn');
+        document.addEventListener('DOMContentLoaded', () => {
+            const preorderModal = document.getElementById('preorderModal');
+            const preorderForm = document.getElementById('preorderForm');
+            const preorderNavBtn = document.getElementById('preorderNavBtn');
+            const preorderMobileBtn = document.getElementById('preorderMobileBtn');
+            const preorderHeroBtn = document.getElementById('preorderHeroBtn');
+            const closePreorderModal = document.getElementById('closePreorderModal');
+            const preorderTotalPrice = document.getElementById('preorderTotalPrice');
+            const submitPreorderBtn = document.getElementById('submitPreorderBtn');
 
-        // Open Modal
-        const openModal = () => {
-            preorderModal.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Disable background scrolling
+            if (!preorderModal) {
+                console.error('Preorder modal not found in DOM.');
+                return;
+            }
+
+            // Open Modal
+            const openModal = () => {
+                preorderModal.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Disable background scrolling
+                
+                // Set default minimum datetime to current local time + 30 minutes
+                const now = new Date();
+                now.setMinutes(now.getMinutes() + 30);
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                const hh = String(now.getHours()).padStart(2, '0');
+                const min = String(now.getMinutes()).padStart(2, '0');
+                document.getElementById('preorderTime').min = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+            };
+
+            // Close Modal
+            const closeModal = () => {
+                preorderModal.classList.remove('active');
+                document.body.style.overflow = ''; // Restore scrolling
+            };
+
+            if (preorderNavBtn) preorderNavBtn.addEventListener('click', openModal);
+            if (preorderMobileBtn) preorderMobileBtn.addEventListener('click', () => {
+                // Close mobile drawer if open
+                const mobileDrawer = document.getElementById('mobileDrawer');
+                if (mobileDrawer) mobileDrawer.classList.remove('active');
+                openModal();
+            });
+            if (preorderHeroBtn) preorderHeroBtn.addEventListener('click', openModal);
+            if (closePreorderModal) closePreorderModal.addEventListener('click', closeModal);
+
+            // Close on clicking outside container
+            preorderModal.addEventListener('click', (e) => {
+                if (e.target === preorderModal) closeModal();
+            });
+
+            // Item quantity and checkbox interaction
+            const itemCards = document.querySelectorAll('.preorder-item-card');
             
-            // Set default minimum datetime to current local time + 30 minutes
-            const now = new Date();
-            now.setMinutes(now.getMinutes() + 30);
-            const yyyy = now.getFullYear();
-            const mm = String(now.getMonth() + 1).padStart(2, '0');
-            const dd = String(now.getDate()).padStart(2, '0');
-            const hh = String(now.getHours()).padStart(2, '0');
-            const min = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('preorderTime').min = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
-        };
+            const calculateTotal = () => {
+                let total = 0;
+                let hasSelection = false;
 
-        // Close Modal
-        const closeModal = () => {
-            preorderModal.classList.remove('active');
-            document.body.style.overflow = ''; // Restore scrolling
-        };
+                itemCards.forEach(card => {
+                    const checkbox = card.querySelector('.item-checkbox');
+                    const qtyValSpan = card.querySelector('.qty-val');
+                    const minusBtn = card.querySelector('.qty-minus');
+                    const plusBtn = card.querySelector('.qty-plus');
+                    
+                    const price = parseInt(card.dataset.price);
+                    
+                    if (checkbox.checked) {
+                        hasSelection = true;
+                        minusBtn.removeAttribute('disabled');
+                        plusBtn.removeAttribute('disabled');
+                        
+                        const qty = parseInt(qtyValSpan.textContent);
+                        total += price * qty;
+                        card.classList.add('selected');
+                    } else {
+                        minusBtn.setAttribute('disabled', 'true');
+                        plusBtn.setAttribute('disabled', 'true');
+                        card.classList.remove('selected');
+                    }
+                });
 
-        if (preorderNavBtn) preorderNavBtn.addEventListener('click', openModal);
-        if (preorderMobileBtn) preorderMobileBtn.addEventListener('click', () => {
-            // Close mobile drawer if open
-            const mobileDrawer = document.getElementById('mobileDrawer');
-            if (mobileDrawer) mobileDrawer.classList.remove('active');
-            openModal();
-        });
-        if (preorderHeroBtn) preorderHeroBtn.addEventListener('click', openModal);
-        if (closePreorderModal) closePreorderModal.addEventListener('click', closeModal);
-
-        // Close on clicking outside container
-        preorderModal.addEventListener('click', (e) => {
-            if (e.target === preorderModal) closeModal();
-        });
-
-        // Item quantity and checkbox interaction
-        const itemCards = document.querySelectorAll('.preorder-item-card');
-        
-        const calculateTotal = () => {
-            let total = 0;
-            let hasSelection = false;
+                preorderTotalPrice.textContent = `${total} บาท`;
+                
+                if (hasSelection) {
+                    submitPreorderBtn.removeAttribute('disabled');
+                } else {
+                    submitPreorderBtn.setAttribute('disabled', 'true');
+                }
+            };
 
             itemCards.forEach(card => {
                 const checkbox = card.querySelector('.item-checkbox');
                 const qtyValSpan = card.querySelector('.qty-val');
                 const minusBtn = card.querySelector('.qty-minus');
                 const plusBtn = card.querySelector('.qty-plus');
-                
-                const price = parseInt(card.dataset.price);
-                
-                if (checkbox.checked) {
-                    hasSelection = true;
-                    minusBtn.removeAttribute('disabled');
-                    plusBtn.removeAttribute('disabled');
-                    
-                    const qty = parseInt(qtyValSpan.textContent);
-                    total += price * qty;
-                    card.classList.add('selected');
-                } else {
-                    minusBtn.setAttribute('disabled', 'true');
-                    plusBtn.setAttribute('disabled', 'true');
-                    card.classList.remove('selected');
-                }
-            });
 
-            preorderTotalPrice.textContent = `${total} บาท`;
-            
-            if (hasSelection) {
-                submitPreorderBtn.removeAttribute('disabled');
-            } else {
-                submitPreorderBtn.setAttribute('disabled', 'true');
-            }
-        };
+                checkbox.addEventListener('change', calculateTotal);
 
-        itemCards.forEach(card => {
-            const checkbox = card.querySelector('.item-checkbox');
-            const qtyValSpan = card.querySelector('.qty-val');
-            const minusBtn = card.querySelector('.qty-minus');
-            const plusBtn = card.querySelector('.qty-plus');
-
-            checkbox.addEventListener('change', calculateTotal);
-
-            minusBtn.addEventListener('click', () => {
-                let qty = parseInt(qtyValSpan.textContent);
-                if (qty > 1) {
-                    qty--;
-                    qtyValSpan.textContent = qty;
-                    calculateTotal();
-                }
-            });
-
-            plusBtn.addEventListener('click', () => {
-                let qty = parseInt(qtyValSpan.textContent);
-                qty++;
-                qtyValSpan.textContent = qty;
-                calculateTotal();
-            });
-        });
-
-        // Submit Form
-        preorderForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const name = document.getElementById('preorderName').value.trim();
-            const phone = document.getElementById('preorderPhone').value.trim();
-            const pickupTime = document.getElementById('preorderTime').value;
-            const cupPreference = document.getElementById('preorderCup').value;
-            const notes = document.getElementById('preorderNotes').value.trim();
-
-            const selectedItems = [];
-            itemCards.forEach(card => {
-                const checkbox = card.querySelector('.item-checkbox');
-                if (checkbox.checked) {
-                    selectedItems.push({
-                        name: card.dataset.name,
-                        quantity: parseInt(card.querySelector('.qty-val').textContent),
-                        price: parseInt(card.dataset.price)
-                    });
-                }
-            });
-
-            if (selectedItems.length === 0) {
-                alert('กรุณาเลือกเครื่องดื่มหรือขนมอย่างน้อย 1 รายการค่ะ');
-                return;
-            }
-
-            const totalPrice = selectedItems.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0);
-
-            // Change submit state
-            submitPreorderBtn.setAttribute('disabled', 'true');
-            const originalBtnHtml = submitPreorderBtn.innerHTML;
-            submitPreorderBtn.innerHTML = '<span>กำลังบันทึกออเดอร์...</span>';
-
-            try {
-                const response = await fetch('/api/preorder', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name,
-                        phone,
-                        pickupTime: new Date(pickupTime).toLocaleString('th-TH'),
-                        cupPreference,
-                        items: selectedItems,
-                        totalPrice,
-                        notes
-                    })
+                minusBtn.addEventListener('click', () => {
+                    let qty = parseInt(qtyValSpan.textContent);
+                    if (qty > 1) {
+                        qty--;
+                        qtyValSpan.textContent = qty;
+                        calculateTotal();
+                    }
                 });
 
-                const result = await response.json();
-
-                if (response.ok && result.status === 'success') {
-                    alert('🎉 สั่งซื้อล่วงหน้าสำเร็จแล้วค่ะ! ทางร้านได้รับออเดอร์เรียบร้อยแล้วค่ะ');
-                    preorderForm.reset();
-                    // Reset selected states
-                    itemCards.forEach(card => {
-                        card.querySelector('.item-checkbox').checked = false;
-                        card.querySelector('.qty-val').textContent = '1';
-                    });
+                plusBtn.addEventListener('click', () => {
+                    let qty = parseInt(qtyValSpan.textContent);
+                    qty++;
+                    qtyValSpan.textContent = qty;
                     calculateTotal();
-                    closeModal();
-                } else {
-                    alert(`ขออภัยค่ะ เกิดข้อผิดพลาด: ${result.message || 'กรุณาลองใหม่อีกครั้ง'}`);
+                });
+            });
+
+            // Submit Form
+            preorderForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const name = document.getElementById('preorderName').value.trim();
+                const phone = document.getElementById('preorderPhone').value.trim();
+                const pickupTime = document.getElementById('preorderTime').value;
+                const cupPreference = document.getElementById('preorderCup').value;
+                const notes = document.getElementById('preorderNotes').value.trim();
+
+                const selectedItems = [];
+                itemCards.forEach(card => {
+                    const checkbox = card.querySelector('.item-checkbox');
+                    if (checkbox.checked) {
+                        selectedItems.push({
+                            name: card.dataset.name,
+                            quantity: parseInt(card.querySelector('.qty-val').textContent),
+                            price: parseInt(card.dataset.price)
+                        });
+                    }
+                });
+
+                if (selectedItems.length === 0) {
+                    alert('กรุณาเลือกเครื่องดื่มหรือขนมอย่างน้อย 1 รายการค่ะ');
+                    return;
                 }
-            } catch (err) {
-                alert('ขออภัยค่ะ ไม่สามารถส่งออเดอร์ได้ในขณะนี้ กรุณาตรวจสอบอินเทอร์เน็ตหรือติดต่อทางร้านโดยตรงค่ะ');
-            } finally {
-                submitPreorderBtn.innerHTML = originalBtnHtml;
-                submitPreorderBtn.removeAttribute('disabled');
-            }
+
+                const totalPrice = selectedItems.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0);
+
+                // Change submit state
+                submitPreorderBtn.setAttribute('disabled', 'true');
+                const originalBtnHtml = submitPreorderBtn.innerHTML;
+                submitPreorderBtn.innerHTML = '<span>กำลังบันทึกออเดอร์...</span>';
+
+                try {
+                    const response = await fetch('/api/preorder', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name,
+                            phone,
+                            pickupTime: new Date(pickupTime).toLocaleString('th-TH'),
+                            cupPreference,
+                            items: selectedItems,
+                            totalPrice,
+                            notes
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.status === 'success') {
+                        alert('🎉 สั่งซื้อล่วงหน้าสำเร็จแล้วค่ะ! ทางร้านได้รับออเดอร์เรียบร้อยแล้วค่ะ');
+                        preorderForm.reset();
+                        // Reset selected states
+                        itemCards.forEach(card => {
+                            card.querySelector('.item-checkbox').checked = false;
+                            card.querySelector('.qty-val').textContent = '1';
+                        });
+                        calculateTotal();
+                        closeModal();
+                    } else {
+                        alert(`ขออภัยค่ะ เกิดข้อผิดพลาด: ${result.message || 'กรุณาลองใหม่อีกครั้ง'}`);
+                    }
+                } catch (err) {
+                    alert('ขออภัยค่ะ ไม่สามารถส่งออเดอร์ได้ในขณะนี้ กรุณาตรวจสอบอินเทอร์เน็ตหรือติดต่อทางร้านโดยตรงค่ะ');
+                } finally {
+                    submitPreorderBtn.innerHTML = originalBtnHtml;
+                    submitPreorderBtn.removeAttribute('disabled');
+                }
+            });
         });
     </script>
     
