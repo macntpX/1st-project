@@ -80,7 +80,7 @@ module.exports = async (req, res) => {
         });
 
         const requestBody = {
-            model: 'google/gemini-2.5-flash',
+            model: 'openrouter/free',
             messages: messages,
             temperature: 0.7,
             max_tokens: 800
