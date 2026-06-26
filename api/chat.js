@@ -80,7 +80,7 @@ module.exports = async (req, res) => {
         });
 
         const requestBody = {
-            model: 'google/gemma-4-26b-a4b-it:free',
+            model: 'google/gemini-2.5-flash',
             messages: messages,
             temperature: 0.7,
             max_tokens: 800
