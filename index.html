@@ -589,7 +589,46 @@
         </div>
     </footer>
 
-    <!-- Script for Lucide Icons & Interactive Features -->
+    <!-- Chatbot Widget HTML Markup -->
+    <div class="chatbot-widget" id="chatbotWidget">
+        <!-- Floating Action Button -->
+        <button class="chatbot-trigger" id="chatbotTrigger" aria-label="คุยกับน้องมานี">
+            <i data-lucide="message-circle" class="trigger-icon-open"></i>
+            <i data-lucide="x" class="trigger-icon-close" style="display: none;"></i>
+            <span class="trigger-tooltip">ถามน้องมานีได้นะคะ! ☕</span>
+        </button>
+
+        <!-- Chat Window / Drawer -->
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">
+                <div class="chat-header-profile">
+                    <div class="profile-avatar"><i data-lucide="sparkles"></i></div>
+                    <div class="profile-info">
+                        <h3>น้องมานี AI</h3>
+                        <p>ผู้ช่วยอัจฉริยะมานี มีถ้วย</p>
+                    </div>
+                </div>
+                <button class="chat-close-btn" id="chatCloseBtn" aria-label="ซ่อนหน้าแชท"><i data-lucide="minus"></i></button>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <!-- Welcome Message -->
+                <div class="chat-msg msg-ai">
+                    <div class="msg-bubble">
+                        สวัสดีค่ะ ยินดีต้อนรับสู่ร้าน มานี มีถ้วย คาเฟ่ ค่ะ ☕ น้องมานีพร้อมช่วยแนะนำเมนู แนะนำถ้วยดินเผา นำเสนอโปรโมชั่น หรือบอกทางและเวลาเปิดร้านนะคะ มีเรื่องด่วนอยากสอบถาม พิมพ์คุยกับหนูได้เลยค่ะ!
+                    </div>
+                    <span class="msg-time">ระบบ</span>
+                </div>
+            </div>
+            
+            <form class="chat-input-area" id="chatForm">
+                <input type="text" id="chatInput" placeholder="พิมพ์คำถามของคุณที่นี่..." autocomplete="off" required>
+                <button type="submit" class="chat-send-btn" id="chatSendBtn" aria-label="ส่งข้อความ"><i data-lucide="send"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script for Lucide Icons & Interactive Features (Now loaded at the bottom so DOM is fully loaded) -->
     <script>
         // Initialize Lucide Icons
         lucide.createIcons();
@@ -801,44 +840,5 @@
             }
         });
     </script>
-
-    <!-- Chatbot Widget HTML Markup -->
-    <div class="chatbot-widget" id="chatbotWidget">
-        <!-- Floating Action Button -->
-        <button class="chatbot-trigger" id="chatbotTrigger" aria-label="คุยกับน้องมานี">
-            <i data-lucide="message-circle" class="trigger-icon-open"></i>
-            <i data-lucide="x" class="trigger-icon-close" style="display: none;"></i>
-            <span class="trigger-tooltip">ถามน้องมานีได้นะคะ! ☕</span>
-        </button>
-
-        <!-- Chat Window / Drawer -->
-        <div class="chat-window" id="chatWindow">
-            <div class="chat-header">
-                <div class="chat-header-profile">
-                    <div class="profile-avatar"><i data-lucide="sparkles"></i></div>
-                    <div class="profile-info">
-                        <h3>น้องมานี AI</h3>
-                        <p>ผู้ช่วยอัจฉริยะมานี มีถ้วย</p>
-                    </div>
-                </div>
-                <button class="chat-close-btn" id="chatCloseBtn" aria-label="ซ่อนหน้าแชท"><i data-lucide="minus"></i></button>
-            </div>
-            
-            <div class="chat-messages" id="chatMessages">
-                <!-- Welcome Message -->
-                <div class="chat-msg msg-ai">
-                    <div class="msg-bubble">
-                        สวัสดีค่ะ ยินดีต้อนรับสู่ร้าน มานี มีถ้วย คาเฟ่ ค่ะ ☕ น้องมานีพร้อมช่วยแนะนำเมนู แนะนำถ้วยดินเผา นำเสนอโปรโมชั่น หรือบอกทางและเวลาเปิดร้านนะคะ มีเรื่องด่วนอยากสอบถาม พิมพ์คุยกับหนูได้เลยค่ะ!
-                    </div>
-                    <span class="msg-time">ระบบ</span>
-                </div>
-            </div>
-            
-            <form class="chat-input-area" id="chatForm">
-                <input type="text" id="chatInput" placeholder="พิมพ์คำถามของคุณที่นี่..." autocomplete="off" required>
-                <button type="submit" class="chat-send-btn" id="chatSendBtn" aria-label="ส่งข้อความ"><i data-lucide="send"></i></button>
-            </form>
-        </div>
-    </div>
 </body>
 </html>
